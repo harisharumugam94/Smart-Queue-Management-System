@@ -1,4 +1,5 @@
-const js = require('@eslint/js');
+import someModule from 'some-module';
+
 
 module.exports = [
   { ignores: ['eslint.config.cjs', 'dist/**'] },
