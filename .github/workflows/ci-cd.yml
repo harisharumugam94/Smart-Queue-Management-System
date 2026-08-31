@@ -1,0 +1,88 @@
+name: CI/CD Pipeline
+
+# Runs automatically on every push to main, and on every pull request
+# that targets main (so broken code gets caught before it merges).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ---------- Backend: lint + unit tests ----------
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+  # ---------- Frontend: lint + unit tests ----------
+  client:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  # ---------- Build & push Docker images ----------
+  # Only runs after BOTH lint/test jobs above pass, and only on an actual
+  # push to main (not on pull requests — PRs just get checked, not shipped).
+  docker-build-push:
+    needs: [server, client]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Needed to push images to GitHub Container Registry (ghcr.io).
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Logs in to GitHub Container Registry using GitHub's own
+      # automatically-generated token — no separate account, password, or
+      # manually-created secret needed. This IS the "secrets management"
+      # requirement: the token is short-lived and scoped to this repo only.
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/smart-queue-server:latest
+
+      - name: Build and push client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/smart-queue-client:latest

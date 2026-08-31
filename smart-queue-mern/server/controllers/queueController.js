@@ -1,4 +1,5 @@
 const Ticket = require('../models/Ticket');
+const { computeNextTicketNumber } = require('../utils/queueHelpers');
 
 // GET /api/queue — the full current queue (waiting + serving), oldest first
 exports.getQueue = async (req, res) => {
@@ -17,7 +18,7 @@ exports.joinQueue = async (req, res) => {
   try {
     const { customerName } = req.body;
     const lastTicket = await Ticket.findOne().sort({ ticketNumber: -1 });
-    const nextNumber = lastTicket ? lastTicket.ticketNumber + 1 : 1;
+    const nextNumber = computeNextTicketNumber(lastTicket);
     const ticket = await Ticket.create({
       ticketNumber: nextNumber,
       customerName: customerName || 'Guest',

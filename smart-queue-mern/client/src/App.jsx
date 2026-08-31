@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getNowServing } from './queueUtils';
 
 // nginx (see nginx.conf) proxies /api requests to the server container,
 // so the browser only ever needs a relative path — never the server
@@ -47,7 +48,7 @@ export default function App() {
     fetchQueue();
   };
 
-  const nowServing = queue.find((t) => t.status === 'serving');
+  const nowServing = getNowServing(queue);
 
   return (
     <div className="app">
