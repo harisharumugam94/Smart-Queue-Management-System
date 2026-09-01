@@ -1,24 +1,24 @@
 {
-  "name": "smart-queue-client",
+  "name": "smart-queue-server",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Smart Queue Management System - MERN stack (Express + MongoDB)",
+  "main": "server.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^9.39.5",
-    "vite": "^5.4.0",
-    "vitest": "^4.1.11",
-    "vitex": "^0.0.12"
+    "nodemon": "^3.1.4",
+    "vitest": "^4.1.11"
   }
 }
