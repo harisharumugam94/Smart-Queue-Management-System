@@ -5,10 +5,11 @@ module.exports = [
   {
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         require: 'readonly',
         module: 'readonly',
+        exports: 'writable',
         process: 'readonly',
         console: 'readonly',
         __dirname: 'readonly',
