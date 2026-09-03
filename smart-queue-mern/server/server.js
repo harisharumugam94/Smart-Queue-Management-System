@@ -43,6 +43,30 @@ app.get('/metrics', async (req, res) => {
   res.set('Content-Type', client.register.contentType);
   res.end(await client.register.metrics());
 });
+
+const { pushMetrics } = require('prometheus-remote-write');
+
+// Push key metrics to Grafana Cloud every 30 seconds
+setInterval(async () => {
+  try {
+    const requestCount = (await httpRequestCounter.get()).values
+      .reduce((sum, v) => sum + v.value, 0);
+
+    await pushMetrics(
+      {
+        smart_queue_requests_total: requestCount,
+        smart_queue_memory_used_bytes: process.memoryUsage().heapUsed,
+      },
+      {
+        url: `https://${process.env.GRAFANA_USER}:${process.env.GRAFANA_TOKEN}@${process.env.GRAFANA_PUSH_URL.replace('https://', '')}`,
+        labels: { service: 'smart-queue-backend' },
+      }
+    );
+    console.log('Pushed metrics to Grafana Cloud');
+  } catch (err) {
+    console.error('Failed to push metrics:', err.message);
+  }
+}, 30000);
 // ---- END NEW ----
 
 // Health check route — used by Docker's HEALTHCHECK and docker-compose.
