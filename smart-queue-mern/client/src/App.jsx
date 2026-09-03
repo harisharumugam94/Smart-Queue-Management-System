@@ -4,7 +4,7 @@ import { getNowServing } from './queueUtils';
 // nginx (see nginx.conf) proxies /api requests to the server container,
 // so the browser only ever needs a relative path — never the server
 // container's internal name or port.
-const API_BASE = '/api/queue';
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/queue`;
 
 export default function App() {
   const [queue, setQueue] = useState([]);
